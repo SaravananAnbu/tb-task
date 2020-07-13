@@ -1,13 +1,9 @@
-import React from 'react';
-import _ from 'lodash';
-import { Link } from 'react-router-dom';
+import React, { Component } from 'react';
+import { View, Text, ImageBackground,StyleSheet, ScrollView, FlatList, SafeAreaView, Image, TouchableOpacity } from 'react-native';
 
-class Home extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            searchTerm: ""
-        }
+class HomePage extends React.Component {
+    static navigationOptions = {
+        headerShown: false,
     }
     componentDidMount() {
         this.props.fetchInventories(); //Am tring to fetch but it shows CORS error. Hence I used JSON
@@ -18,41 +14,117 @@ class Home extends React.Component {
     }
     render() {
         const { inventories } = this.props;
+        console.log(this.props.inventories)
         return (
-            <div className="container-fluid" style={{ height: '100vh', backgroundImage: 'url(https://image.freepik.com/free-vector/top-view-cups-tea-with-tea-pot_52683-32344.jpg)', backgroundPositionX: 'center', backgroundSize: 'cover', overflowY: 'auto'}}>
-                <div className="row justify-content-center">
-                    <div className="col-12 text-center mb-2 py-3" style={{ backgroundColor: '#8b9f76d1' }}>
-                        <h3 className="text-light">Sadguru Amrit-Tulya's</h3>
-                        <h2 className="text-warning">Tea Shop</h2>
-                    </div>
-                    <div className="col-12 text-right my-4">
-                        <Link to="/item" className="btn btn-secondary px-4" style={{ backgroundColor: "#8b9f76d1" }}>ADD NEW</Link>
-                    </div>
-                </div>
-                <div className="container">
-                    <div className="row justify-content-center py-3">
-                        {inventories.map((each, i) =>
-                        <div className="col-xl-3 col-sm-6 col-10 my-2" key={i}>
-                            <div className="card h-100" style={{ backgroundColor: "transparent"}}>
-                                <img src="https://image.freepik.com/free-photo/top-view-cup-chamomile-tea-with-lemon-mint-leaves-sugar-white-surface-horizontal_176474-5080.jpg" className="card-img-top" alt="..."/>
-                                
-                                <div className="card-body" style={{ backgroundColor:"#8b9f76d1"}}>
-                                    <h5 className="text-white"><b>Name: {each.name}</b></h5>
-                                    <p className="card-title text-white">Description: {each.description}</p>
-                                    <p className="card-title text-white">Price :<b className="badge badge-light p-1 mx-2">{each.price}</b></p>
-                                    <hr/>
-                                    <div className="row">
-                                        <div className="col"><Link to={`/item/${each.id}`} className="btn btn-outline-light w-100">View</Link></div>
-                                        <div className="col"><button className="btn btn-outline-danger w-100" onClick={() => this.deleteItem(each.id)}>Delete</button></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>)}
-                    </div>
-                </div>
-            </div>
-        );
+            <View style={styles.body}>
+                <ImageBackground source={{ uri: "https://image.freepik.com/free-vector/top-view-cups-tea-with-tea-pot_52683-32344.jpg" }} style={styles.image}>
+                    <View style={styles.titleContainer}>
+                        <Text style={styles.titleText1}>Sadguru Amrit-Tulya's</Text>
+                        <Text style={styles.titleText2}>Tea Shop</Text>
+                    </View>
+                    <TouchableOpacity style={{ backgroundColor: "orange", margin: 10 }}
+                        onPress={() => this.props.navigation.navigate('Inventory')}>
+                        <View style={[ styles.button, { padding: 8, paddingHorizontal: 20, borderLeftWidth: 1}]}>
+                            <Text style={[ styles.button_text, { fontSize: 18 }]}>CREATE NEW</Text>
+                        </View>
+                    </TouchableOpacity>
+                    <SafeAreaView style={styles.container}>
+                        <FlatList
+                            data={inventories}
+                            renderItem={(data, i) => {
+                                const item = data.item;
+                                return (
+                                    <View key={i} style={styles.card}>
+                                        <Text style={styles.title}>{item.name}</Text>
+                                        <View style={{ textAlign: "center", flex: 1, alignItems: "center", padding: 10}}>
+                                            <Image source={{ uri: "https://image.freepik.com/free-photo/top-view-cup-chamomile-tea-with-lemon-mint-leaves-sugar-white-surface-horizontal_176474-5080.jpg" }} style={{ height: 100, marginBottom: 10, width:"50%" }}/>
+                                            <Text style={styles.text}>Description: {item.description}</Text>
+                                            <Text style={styles.text}>Price: {item.price}</Text>
+                                        </View>
+                                        <View style={{ flexDirection: 'row', width: "100%", backgroundColor: "#8b9f76d1" }}>
+                                            <TouchableOpacity style={{ flex: 1 }}
+                                                onPress={() => this.props.navigation.push('Inventory', { id: item.id })}>
+                                                <View style={[ styles.button, { padding: 8, paddingHorizontal: 20, borderRightWidth: 1}]}>
+                                                    <Text style={[ styles.button_text, { fontSize: 18 }]}>View</Text>
+                                                </View>
+                                            </TouchableOpacity> 
+                                            <TouchableOpacity style={{ flex: 1 }}
+                                                onPress={() => this.deleteItem(item.id)}>
+                                                <View style={[ styles.button, { padding: 8, paddingHorizontal: 20, borderLeftWidth: 1}]}>
+                                                    <Text style={[ styles.button_text, { fontSize: 18 }]}>Delete</Text>
+                                                </View>
+                                            </TouchableOpacity>
+                                        </View>
+                                    </View>
+                                )
+                            }}
+                            keyExtractor={item => item.id}
+                        />
+                    </SafeAreaView>
+                </ImageBackground>
+            </View>
+        )
     }
 }
 
-export default Home;
+const styles = StyleSheet.create({
+    body: {
+        flex: 1,
+        flexDirection: "column"
+    },
+    card: {
+        height: 300,
+        margin: 20,
+        backgroundColor: '#ffffffb8',
+        elevation: 5
+    },
+    image: {
+        flex: 1,
+        resizeMode: "cover",
+        opacity: 1,
+    },
+    titleContainer: {
+        backgroundColor: '#8b9f76d1',
+        padding: 10
+    },
+    titleText1: {
+        color: '#fff',
+        textAlign: "center",
+        fontSize: 21
+    },
+    titleText2: {
+        color: 'orange',
+        textAlign: "center", 
+        fontSize: 18
+    },
+    container: {
+        flex: 1,
+    },
+    title: {
+        color: '#fff',
+        fontSize: 18,
+        paddingVertical: 10,
+        textAlign: "center",
+        fontWeight: "bold",
+        backgroundColor: '#8b9f76d1'
+    },
+    text: {
+        color: '#000',
+        textAlign: "left",
+        padding: 5,
+        fontSize: 16,
+    },
+    button: {
+        alignItems: 'center',
+        backgroundColor: '#8b9f76d1',
+        borderColor: "#fff",
+        padding: 15
+    },
+    button_text: {
+        textAlign: 'center',
+        fontSize: 18,
+        color: '#fff'
+    },
+})
+
+export default HomePage;

@@ -1,8 +1,10 @@
 import React from 'react';
-import _ from 'lodash';
-import { Link } from 'react-router-dom';
+import { View, Text, Image, ImageBackground, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 
 class Inventory extends React.Component {
+    static navigationOptions = {
+        headerShown: false
+    }
     constructor(props) {
         super(props);
         this.state = {
@@ -18,85 +20,152 @@ class Inventory extends React.Component {
         this.setState({ [e.target.name]: e.target.value });
     }
     handleSubmit() {
-        if(this.state.name !== "" && this.state.description !== "" && !isNaN(Number(this.state.price))) {
-            this.props.createItemToInventory({ name: this.state.name, description: this.state.description, price: Number(this.state.price) })
+        if(this.state.isCreate) {
+            if(this.state.name !== "" && this.state.description !== "" && !isNaN(Number(this.state.price))) {
+                this.props.createItemToInventory({ name: this.state.name, description: this.state.description, price: Number(this.state.price) }).then(
+                    res => {
+                        this.props.navigation.goBack()
+                    }
+                )
+            }
+        } else {
+            this.props.navigation.goBack()
         }
     }
     componentDidMount() {
-        if(this.props.match.params && this.props.match.params.id) {
-            this.props.fetchInventorybyId(this.props.match.params.id); //Am tring to fetch but it shows CORS error. Hence I used JSON
+        console.log(this.props)
+        if(this.props.navigation.state.params && this.props.navigation.state.params.id) {
+            this.props.fetchInventorybyId(this.props.navigation.state.params.id); 
         } else {
             this.setState({ isCreate: true })
         }
     }
-  
+    componentDidUpdate(prevProps) {
+        if(prevProps.inventory !== this.props.inventory) {
+            this.setState({ 
+                name: this.props.inventory.name,
+                description: this.props.inventory.description,
+                price: this.props.inventory.price.toString(),
+            })
+        }
+    }
     render() {
         const { inventory } = this.props;
         const { isCreate, name, description, price } = this.state;
+        console.log(inventory, "inventory")
         return (
-            <div className="container-fluid" style={{ height: '100vh', backgroundImage: 'url(https://image.freepik.com/free-vector/top-view-cups-tea-with-tea-pot_52683-32344.jpg)', backgroundPositionX: 'center', backgroundSize: 'cover', overflowY: 'auto'}}>
-                <div className="row">
-                    <div className="col-12 text-center mb-2 py-3" style={{ backgroundColor: '#8b9f76d1' }}>
-                        <h3 className="text-light">Sadguru Amrit-Tulya's</h3>
-                        <h2 className="text-warning">Tea Shop</h2>
-                    </div>
-                </div>
-                <div className="container">
-                    <div className="row justify-content-center py-3">
-                        <div className="col-xl-6 col-lg-8 col-10 my-2">
-                            <div className="card h-100" style={{ backgroundColor: "transparent"}}>
-                                <img src="https://image.freepik.com/free-photo/top-view-cup-chamomile-tea-with-lemon-mint-leaves-sugar-white-surface-horizontal_176474-5080.jpg" className="card-img-top" alt="..."/>
-                                {isCreate ?
-                                 <div className="card-body" style={{ backgroundColor:"#8b9f76d1"}}>
-                                    <form>
-                                        <div className="form-group">
-                                            <label className="text-light">Name</label>
-                                            <input 
-                                                type="text"
-                                                className="form-control"
-                                                name="name"
-                                                value={name}
-                                                onChange={this.handleChange}
-                                            />
-                                        </div>
-                                        <div className="form-group">
-                                            <label className="text-light">Description</label>
-                                            <input 
-                                                type="text"
-                                                className="form-control"
-                                                name="description"
-                                                value={description}
-                                                onChange={this.handleChange}
-                                            />
-                                        </div>
-                                        <div className="form-group">
-                                            <label className="text-light">Price</label>
-                                            <input 
-                                                type="text"
-                                                className="form-control"
-                                                name="price"
-                                                value={price}
-                                                onChange={this.handleChange}
-                                            />
-                                        </div>
-                                    </form>
-                                    <div className="text-center float-right"><button onClick={this.handleSubmit} className="btn btn-light btn-sm text-center px-3">Create</button></div>
-                                    <div className="text-center float-left"><Link to="/" className="btn btn-light btn-sm text-center px-3">View All</Link></div>
-                                </div> : 
-                                 <div className="card-body" style={{ backgroundColor:"#8b9f76d1"}}>
-                                    <h5 className="text-white"><b>Name: {inventory.name}</b></h5>
-                                    <p className="card-title text-white">Description: {inventory.description}</p>
-                                    <p className="card-title text-white">Price :<b className="badge badge-light p-1 mx-2">{inventory.price}</b></p>
-                                    <hr/>
-                                    <div className="text-center"><Link to="/" className="btn btn-light btn-sm text-center">View All</Link></div>
-                                </div>}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
+            <View style={styles.body}>
+                <ImageBackground source={{ uri: "https://image.freepik.com/free-vector/top-view-cups-tea-with-tea-pot_52683-32344.jpg" }} style={styles.image}>
+                    <View style={styles.titleContainer}>
+                        <Text style={styles.titleText1}>Sadguru Amrit-Tulya's</Text>
+                        <Text style={styles.titleText2}>Tea Shop</Text>
+                    </View>
+                    <View style={styles.container}>
+                        <View style={styles.container, { width: '80%'}}>
+                            <Image
+                                resizeMode="contain"
+                                style={{ width: '50%', height: 200, alignSelf: 'center'}}
+                                source={{ uri: "https://image.freepik.com/free-photo/top-view-cup-chamomile-tea-with-lemon-mint-leaves-sugar-white-surface-horizontal_176474-5080.jpg "}}
+                            />
+                            <Text style={styles.label}>Details</Text>
+                            <TextInput
+                                style={styles.text_input}
+                                placeholder="Name"
+                                placeholderTextColor="#8b9f76d1"
+                                onChangeText={(text) => this.setState({ name: text })}
+                                value={name}
+                                editable={isCreate}
+                            />
+                            <TextInput
+                                style={styles.text_input}
+                                placeholder="Description"
+                                placeholderTextColor="#8b9f76d1"
+                                onChangeText={(text) => this.setState({ description: text })}
+                                value={description}
+                                editable={isCreate}
+                            />
+                            <TextInput
+                                style={styles.text_input}
+                                placeholder="Price"
+                                placeholderTextColor="#8b9f76d1"
+                                onChangeText={(text) => this.setState({ price: text })}
+                                value={price}
+                                editable={isCreate}
+                                keyboardType="numeric"
+                            />
+                            <TouchableOpacity style={{ width: '100%',  marginTop: 30 }} onPress={this.handleSubmit}>
+                                <View style={styles.button}>
+                                    <Text style={styles.button_text}>{ isCreate ? "Create" : "OK"}</Text>
+                                </View>
+                            </TouchableOpacity>
+                        </View> 
+                </View>
+                </ImageBackground>
+            </View>
+        )
     }
 }
+
+const styles = StyleSheet.create({
+    body: {
+        flex: 1,
+        flexDirection: "column"
+    },
+    image: {
+        flex: 1,
+        resizeMode: "cover",
+        opacity: 1,
+    },
+    titleContainer: {
+        backgroundColor: '#8b9f76d1',
+        padding: 10
+    },
+    titleText1: {
+        color: '#fff',
+        textAlign: "center",
+        fontSize: 21
+    },
+    titleText2: {
+        color: 'orange',
+        textAlign: "center", 
+        fontSize: 18
+    },
+    container: {
+        flex: 1, 
+        flexDirection: 'column', 
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#ffffffb8'
+    },
+    label: {
+        color: '#8b9f76d1',
+        textAlign: 'center',
+        fontSize: 22,
+        marginBottom: 25,
+        fontWeight: 'bold'
+    },
+    button: {
+        alignItems: 'center',
+        borderRadius: 5,
+        backgroundColor: '#8b9f76d1',
+        padding: 15,
+    },
+    button_text: {
+        textAlign: 'center',
+        fontSize: 18,
+        color: '#fff'
+    },
+    text_input: {
+        borderWidth: 2,
+        borderColor: '#8b9f76d1',
+        borderRadius: 5,
+        width: '100%',
+        color: '#8b9f76d1',
+        fontSize: 18,
+        padding: 15,
+        textAlign: 'center',
+        marginBottom: 20
+    },
+})
 
 export default Inventory;

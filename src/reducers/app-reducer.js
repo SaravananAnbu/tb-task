@@ -21,4 +21,3 @@ const AppReducer = (state = defaultState, action) => {
 };
 
 export default AppReducer;
-  

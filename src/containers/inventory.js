@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 import InventoryComponent from '../components/inventory';
-import { fetchInventorybyId, deleteItemFromInventory, createItemToInventory } from '../actions';
+import { fetchInventorybyId, deleteItemFromInventory, createItemToInventory } from '../actions/inventory';
 
 
 const mapStateToProps = (state) => {
